@@ -60,9 +60,47 @@ systemctl status docker.service
 journalctl -u docker > log.txt
 tail -f -n 500 log.txt
 
+开机自启动
+
+systemctl enable docker
+
+systemctl restart docker.service
+
 需要通过命令：ps -ef | grep dockerd
 
 dockerd -D
+
+重启docker服务
+
+systemctl daemon-reload    ##使配置文件生效
+systemctl restart docker
+
+
+2.6、关闭SELinux
+
+[root@swaram01 ~]# getenforce
+Disabled
+[root@swaram01 ~]# /usr/sbin/sestatus -v
+SELinux status:                 disabled
+修改
+
+vi /etc/selinux/config
+将SELINUX=enforcing改为SELINUX=disabled 
+
+
+/etc/hosts
+
+172.20.1.10 ag07
+172.20.1.8 ag05
+
+
+关闭防火墙
+
+systemctl stop firewalld.service #停止firewall
+systemctl disable firewalld.service #禁止firewall开机启动
+开启
+systemctl start firewalld.service
+
 
 4) 服务发现consul
 
@@ -90,14 +128,15 @@ docker run -d swarm join --advertise=172.20.1.10:2375 consul://172.20.1.10:8500
 
 $docker run -d swarm join --advertise=172.20.1.8:2375 consul://172.20.1.10:8500
 
+
+docker swarm join manager --advertise=172.20.1.10:2375 consul://172.20.1.10:8500
+
 检查节点信息:(Primary, Replica)
 
 
-7) docker swarm init 
+7) docker swarm init --advertise-addr 172.20.1.8:2375
 
- docker swarm init
-
-
+ docker swarm init --advertise-addr 172.20.1.8:2375 --listen-addr 172.20.1.8:2375
 
 
 
@@ -171,6 +210,9 @@ root     20310 20075  0 10:05 ?        00:00:00 /usr/bin/docker-proxy -proto tcp
 
 docker Gateway, IpAddress
 
+
+docker swarm init --advertise-addr  172.20.1.8 (swarm join后不要执行这个命令)
+
 （2） 启动 swarm管理节点(可以在主节点启动，也可以在从节点启动)
 
 
@@ -179,6 +221,16 @@ docker Gateway, IpAddress
 (3) 启动工作节点(agent)
 
  docker run -d swarm join --advertise=172.17.0.3:4000 consul://172.17.0.3:8500
+
+
+node 是加入到 swarm 集群中的一个 docker 引擎实体，可以在一台物理机上运行多个 node，node 分为：
+
+manager nodes，也就是管理节点
+
+worker nodes，也就是工作节点
+
+
+
 
 
 
@@ -197,9 +249,9 @@ sysctl -p
 使用集群：
 
  
-docker -H 172.17.0.1:2375 ps
+docker -H 172.17.0.10:2375 info
 
-docker -H 172.20.1.8:2375 ps
+docker -H 172.20.1.8:2375 info
 
 可以查看目前集群中正运行的容器，但不包括swarm manager节点。
 
@@ -235,8 +287,8 @@ networks:
 固定IP为 72.17.0.2
 
 来源：
-Gateway": "172.17.0.1",
-"IPAddress": "172.17.0.3",
+ Gateway": "172.17.0.1",
+"IPAddress": "172.17.0.2",
 
 
 
@@ -245,14 +297,42 @@ Gateway": "172.17.0.1",
 
 
 
+########## 
+
+相关命令：
+
+docker swarm leave --force : 
+
+ag05上执行：
+(1)docker swarm init --advertise-addr  172.20.1.8:2375
+
+(2) docker swarm join-token manager  
+To add a manager to this swarm, run the following command:
+(3) docker swarm join --token SWMTKN-1-3wdvh4qmjhsvpe0j4kp78ts6d6es5ey3wuklvmwtkgs7xdby41-1yzx2l9ua6b32tkfghlg72nwp 172.20.1.8:2375
 
 
+docker swarm join --token SWMTKN-1-2m64dv6u1pwa3g17zr7jsk1h3qxvkx4qubek4m7df0u644of7g-0nslviscus7ead5b3al1hv0kz 172.20.1.8:2375
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+
+在ag07上执行 
 
 
+docker swarm join --token SWMTKN-1-47ov0ue8etrkpbkv7pdf52ewydom0mf5eqzwixyye5p17n7ocg-886wqlr8i4y5b7mhbf4zvwz65 172.20.1.10:2375 
+
+docker swarm join --token SWMTKN-1-3wdvh4qmjhsvpe0j4kp78ts6d6es5ey3wuklvmwtkgs7xdby41-1yzx2l9ua6b32tkfghlg72nwp 172.20.1.10:2375
+
+新增节点发生异常：
+https://docs.docker.com/config/daemon/systemd/#httphttps-proxy
+
+If you have internal Docker registries that you need to contact without proxying you can specify them via the NO_PROXY environment variable.
+
+详见：https://github.com/docker/for-linux/issues/415
+
+yum downgrade docker-ce-17.12.1.ce-1.el7.centos
 
 
-
-
+docker swarm init --advertise-addr  172.20.1.10:2375
 
 
 
@@ -263,4 +343,346 @@ Gateway": "172.17.0.1",
  docker tag wurstmeister/kafka:latest registry.cn-shenzhen.aliyuncs.com/agilean/zhiwei-kafka:0.1
  (3) push 
  docker push registry.cn-shenzhen.aliyuncs.com/agilean/zhiwei-kafka:0.1
+ 
+ 
+ 
+ 
+ docker info | grep "Docker Root Dir" 
+ 
+ 
+ 
+ https://www.meiwen.com.cn/subject/avusbttx.html
+ 
+ 
+ 
+ 
+ ************ 正确的做法，2375是docker的通讯端口，保持默认TCP: 2377 ***** 
+ 1, ssh 互通
+ 
+ 2, /etc/docker/daemon.json
+ 
+ {
+  "registry-mirrors": ["https://n1czrt72.mirror.aliyuncs.com"],
+
+  "insecure-registries": ["172.20.1.10:5000"],
+
+   "hosts": ["tcp://0.0.0.0:2375", "unix:///var/run/docker.sock"]
+}
+ 
+ 
+3,ag05:
+  docker swarm init 
+  
+   docker swarm join --token SWMTKN-1-0v0u7f9s67qkhmox6srdih7sjyt4ia3clkz1ln20sd97hlfmdl-5hcq1qd24mchoo9sf1wdpknfi 172.20.1.8:2377
+  
+4,ag05:
+ docker swarm join-token manager
+ 
+5, ag07:
+ 
+ docker swarm join --token SWMTKN-1-0v0u7f9s67qkhmox6srdih7sjyt4ia3clkz1ln20sd97hlfmdl-5hcq1qd24mchoo9sf1wdpknfi 172.20.1.8:2377
+   
+ [root@ag05 ~]# docker node list
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+6zyzos9rz2i5rjoxn922fmd32 *   ag05                Ready               Active              Leader              19.03.6
+wqew0spqoc44fdxjta5k0gnvq     ag07                Ready               Active              Reachable           19.03.6
+
+6, firewall 策略
+ 
+集群管理节点必须使用相应的协议并且保证端口可用
+集群管理通信：TCP，端口2377    
+节点通信：TCP和UDP，端口7946    
+覆盖型网络(docker网络)：UDP，端口4789   overlay驱动 
+
+$vi /etc/sysconfig/iptables
+
+
+-A INPUT -m state –state NEW -m tcp -p tcp –dport 2377 -j ACCEPT
+-A INPUT -m state –state NEW -m tcp -p tcp –dport 7946 -j ACCEPT
+-A INPUT -m state –state NEW -m tcp -p tcp –dport 4789 -j ACCEPT
+
+/etc/init.d/iptables restart      #最后重启防火墙使配置生效 
+
+
+对于云主机，通过安全组访问，直接关闭防火墙即可。
+
+关闭防火墙
+
+systemctl stop firewalld.service #停止firewall
+systemctl disable firewalld.service #禁止firewall开机启动
+开启
+systemctl start firewalld.service
+
+
+7, 主节点查看信息 
+$docker info 
+Swarm: active
+  NodeID: u56gdhzzq68ety5ei3tet454z
+  Is Manager: true
+  ClusterID: lqlltzh03tfbhfg6f9qs1qx2b
+  Managers: 3
+  Nodes: 3
+  
+Manager Addresses:
+   172.20.1.10:2377
+   172.20.1.5:2377
+   172.20.1.8:2377  
+
+8, docker network ls
+
+9, 主节点创建一个zhiwei的网络，自定义IP
+
+先删除原来的网络：
+
+docker network rm zhiwei
+
+
+docker network create  --driver overlay --attachable    zhiwei
+
+
+docker network inspect zhiwei
+
+"Config": [
+                {
+                    "Subnet": "10.0.1.0/24",
+                    "Gateway": "10.0.1.1"
+                }
+            ]
+
+#docker network create  --driver overlay --attachable --subnet 172.19.0.1/16  --opt encrypted  zhiwei
+
+--attachable ： 独立容器也能够通过该overlay网络进行通信，如果没加这个参数，则只能是swam节点的容器才能够访问
+
+
+docker network create -d overlay --attachable zhiwei
+
+
+[root@ag05 zw-docker]# docker network ls
+NETWORK ID          NAME                 DRIVER              SCOPE
+m8nh42lqnzsf        zhiwei               overlay             swarm
+从节点也可以查看到：
+[root@ag07 ~]# docker network ls
+NETWORK ID          NAME                       DRIVER              SCOPE
+m8nh42lqnzsf        zhiwei                     overlay             swarm
+
+eg,运行容器并且指定IP:
+
+docker run -itd --name networkTest1 --net zhiwei --ip 172.19.0.2 centos:latest /bin/bash
+
+
+10, 创建一个服， 挂载在NAME=zhiwei , DRIVER=overlay的网络上
+
+以超轻量级Linux镜像cirros为例
+
+
+docker service create  --replicas 1 --name my-cirros  --network zhiwei  cirros  
+ 
+  //ag05
+docker run -it --name alpine1 --network zhiwei alpine ping www.baidu.com  
+  //ag03
+docker run -it --name alpine2 --network zhiwei alpine ping www.baidu.com 
+ 
+需要查看当前网卡有没有使用 172.19.0.1/16 这个subnet 
+ 
+ docker network ls
+ 
+ docker network inspect <ID>
+ 查看subnet一项有没有使用172.19.0.1/16
+ (1) docker service create <NAME>
+ (2) 查看服务 docker service ls
+ (3) 删除服务 docker service rm 
+ (4) 查看服务状态：docker service ps <ID,NAME>
+ (4) docker node list
+ (5) 群删除节点 
+ docker node  update --availability drain ag03 将节点停用,该节点上的容器会迁移到其他节点
+ docker ps 检查是否迁移完毕
+ docker node demote ag03 降级
+  Manager ag03 demoted in the swarm.
+ docker node rm ag03
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ docker service 练习
+ 
+ 1, --replicas指定一个service有几个实例运行
+ 
+ 在指定的网络zhiwei下运行
+ 
+ docker service create --replicas 2 --name baidu --network zhiwei alpine ping www.baidu.com
+ 
+ [root@ag05 ~]# docker service create --replicas 2 --name baidu --network zhiwei alpine ping www.baidu.com
+j1xlkztb64rnowr3xk6t9vj0q
+overall progress: 2 out of 2 tasks 
+1/2: running   [==================================================>] 
+2/2: running   [==================================================>] 
+verify: Service converged 
+ 
+
+ 
+ 2, 查看Service在哪些节点运行
+ 
+ docker service ps baidu
+ 
+ 3,查看服务日志：
+ 
+ docker service logs -f -t yzk
+ 
+ 
+ 3, 
+ 
+ 
+ 
+ 
+ 
+ 
+ "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "172.19.0.0/16",
+                    "Gateway": "172.19.0.1"
+                }
+            ]
+        },
+ 
+  "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "172.19.0.1/16",
+                    "Gateway": "172.19.0.1"
+                }
+            ]
+        },
+ 
+ docker_gwbridge 删除
+ docker swarm leave
+ docker network rm docker_gwbridge
+ service docker restart
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ docker stack 使用:
+ 
+ 
+ 1,docker stack deploy probe  -c docker-compose.yml
+ 2,docker stack services probe
+ 3,docker stack ps probe
+ 4,docker stack rm probe
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 私有仓库
+ 
+ 1, vi /etc/docker/daemon.json
+ 
+ {
+"registry-mirrors":["https://docker.mirrors.ustc.edu.cn"],
+"insecure-registries":["192.168.25.129:5000"]
+}
+2,systemctl restart docker
+
+3, 启动私有仓库
+
+  docer start registry
+  
+  
+  
+  wget http://172.19.0.8:9903
+ 
+ 
+ scp -r /root/zw-docker/probe/*  root@ag07: /root/zw-docker/probe/
+ 
+ 
+ /root/zw-docker/probe
+ 
+ 私有仓库的用户名、密码的设置
+ https://www.cnblogs.com/nulige/articles/10926088.html
+ 
+ 
+ 
+********** 跨主机通讯实践 ******************
+ 1，upload the zk.war project
+ scp -r /Users/zhangxiao/eclipse-workspace/zk/target/zk.war root@139.198.123.199:/root/zw-docker/probe/
+ 
+ scp -r /Users/zhangxiao/eclipse-workspace/zk/target/zk.war root@139.198.125.75:/root/zw-docker/probe/
+ 
+ 
+
+ 
+ 2, tuple
+ 
+ ag07:  (docker-compose.yml) ipv4_address: 10.0.1.8,  innerIP(eth0): 172.20.1.10, port: 9003
+ 
+ ag05:   (docker-compose.yml) ipv4_address: 10.0.1.9,  innerIP(eth0): 172.20.1.8, port: 9004
+ 
+ 容器：
+ wget http://172.19.0.8:9003
+ wget http://172.19.0.9:9004
+ 
+ wget http://172.20.1.10:9003
+ wget http://172.20.1.8:9004
+ 
+ 3, docker-swarm 启动服务
+ 
+ 
+ ag07:
+ docker stack deploy -c docker-compose.yml probe1
+ docker stack ls
+ 
+ ag05:
+ docker stack deploy -c docker-compose.yml probe2
+ docker service ps probe1_probe 
+ 
+ 
+ 
+ 先制作镜像：
+ docker build -t registry.cn-shenzhen.aliyuncs.com/agilean/probe:0.1 .
+ 
+ docker build -t registry.cn-shenzhen.aliyuncs.com/agilean/probe:0.2 .
+ 
+ docker build -t probe:0.2 .
+ 
+ docker build -t probe:0.3 .
+ 打tag
+ docker tag probe:0.1 registry.cn-shenzhen.aliyuncs.com/agilean/probe:0.1
+ 
+ 再推送：
+ 
+ docker push registry.cn-shenzhen.aliyuncs.com/agilean/probe:0.1
+ 
+ 
  
