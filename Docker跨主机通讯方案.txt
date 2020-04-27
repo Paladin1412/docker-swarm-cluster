@@ -26,6 +26,17 @@ ps -ef|grep docker
 }
 
 
+ /etc/docker/daemon.json 
+{
+  "registry-mirrors": ["https://n1czrt72.mirror.aliyuncs.com"],
+
+  "insecure-registries": ["172.20.1.10:5000"]
+
+   
+}
+
+
+
 ****
 在./etc/docker/daemon.json中添加"hosts":["tcp://0.0.0.0:2375", "unix:///var/run/docker.sock"]启动失败;
 
@@ -303,6 +314,8 @@ networks:
 
 docker swarm leave --force : 
 
+
+
 ag05上执行：
 (1)docker swarm init --advertise-addr  172.20.1.8:2375
 
@@ -499,7 +512,8 @@ docker run -it --name alpine2 --network zhiwei alpine ping www.baidu.com
  docker node demote ag03 降级
   Manager ag03 demoted in the swarm.
  docker node rm ag03
- 
+  下线某结点上任务（容器）:docker node update --availability drain 结点HOSTNAME名（通过docker node ls）。
+  
  
  
  
@@ -592,7 +606,7 @@ verify: Service converged
  3,docker stack ps probe
  4,docker stack rm probe
  
- 
+ docker stack deploy nginx  -c docker-compose.yml
  
  
  
@@ -636,12 +650,16 @@ verify: Service converged
  
 ********** 跨主机通讯实践 ******************
  1，upload the zk.war project
+ scp -r /Users/zhangxiao/eclipse-workspace/zk/target/zk.war root@139.198.123.199:/root/zw-docker/files/probe/
+ 
+ 
  scp -r /Users/zhangxiao/eclipse-workspace/zk/target/zk.war root@139.198.123.199:/root/zw-docker/probe/
+ 
  
  scp -r /Users/zhangxiao/eclipse-workspace/zk/target/zk.war root@139.198.125.75:/root/zw-docker/probe/
  
+scp -r /Users/zhangxiao/eclipse-workspace/zk/target/zk.war root@139.198.125.75:/root/zw-docker/files/probe/
  
-
  
  2, tuple
  
@@ -658,25 +676,32 @@ verify: Service converged
  
  3, docker-swarm 启动服务
  
+ 172.17.0.1
  
  ag07:
- docker stack deploy -c docker-compose.yml probe1
+ docker stack deploy -c docker-compose.yml probe2
  docker stack ls
  
  ag05:
- docker stack deploy -c docker-compose.yml probe2
+ docker stack deploy -c docker-compose.yml probe1
  docker service ps probe1_probe 
  
  
  
  先制作镜像：
- docker build -t registry.cn-shenzhen.aliyuncs.com/agilean/probe:0.1 .
+ ag05
+ docker build -t registry.cn-shenzhen.aliyuncs.com/agilean/probe2:0.1 .
+ docker push registry.cn-shenzhen.aliyuncs.com/agilean/probe2:0.1
+ ag07
+ docker build -t registry.cn-shenzhen.aliyuncs.com/agilean/probe2:0.1 .
+ docker push registry.cn-shenzhen.aliyuncs.com/agilean/probe2:0.1
  
- docker build -t registry.cn-shenzhen.aliyuncs.com/agilean/probe:0.2 .
  
  docker build -t probe:0.2 .
  
  docker build -t probe:0.3 .
+ 
+ docker build -t probe:0.4 .
  打tag
  docker tag probe:0.1 registry.cn-shenzhen.aliyuncs.com/agilean/probe:0.1
  
@@ -684,5 +709,124 @@ verify: Service converged
  
  docker push registry.cn-shenzhen.aliyuncs.com/agilean/probe:0.1
  
+ 每个节点都必须 docker build 镜像 ，否则在节点上不启动，出现 No image错误提示
  
+ 
+ 查看服务对应的IP：
+ 
+ 
+
+$ docker inspect -f {{.NetworkSettings.Networks.zhiwei.IPAMConfig.IPv4Address}} 585c46f5f8fb
+
+ 
+ 
+ 1，直接更新Volume中属性可以更新镜像。
+ 
+ 
+ 2 , overlay
+ 
+  2.1  create network  (eth0网卡的区域,172.20.1.8)
+  
+  docker network create  --driver overlay --attachable --subnet=172.20.1.0/24  kanban
+  
+  等同于
+  services:
+  probe2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: "probe"
+    image: "registry.cn-shenzhen.aliyuncs.com/agilean/probe2:0.1"
+    volumes:
+     - "/root/zw-docker/files/probe:/data/zhiwei/probe"
+    restart: always
+    networks:
+         extnetwork:
+            kanban:
+            ipv4_address: 172.20.1.5
+          
+    expose:
+      - "9003"
+    ports:
+      - "9003:9003"
+
+networks:
+  kanban:
+    driver: overlay
+    ipam:
+      config:
+        - subnet: 172.20.1.0/24
+  
+
+ 2.2 run service 
+ 
+ ag07:  172.20.1.6
+ docker run -it  --network=kanaban  -d registry.cn-shenzhen.aliyuncs.com/agilean/probe2:0.1  /bin/sh
+ docker inspect -f {{.NetworkSettings.Networks.kanaban.IPAMConfig.IPv4Address}} c0c
+ IP = 172.20.1.6
+
+ 
+ 
+ ag05: 172.20.1.4
+ 
+ docker run -it  --network=kanaban -d registry.cn-shenzhen.aliyuncs.com/agilean/probe1:0.1  /bin/sh
+ docker inspect -f {{.NetworkSettings.Networks.kanaban.IPAMConfig.IPv4Address}} c12
+ IP=172.20.1.4
+ 
+ https://blog.csdn.net/lixuanshengchao/article/details/82707249
+ 
+ 
+ 
+ [root@jamza_vm_master_litepaas ~]# docker network create --driver overlay --subnet 10.83.83.0/24 --attachable mynet
+m0tshnpaclxk5ogm0iwq1b715
+[root@jamza_vm_master_litepaas ~]#
+[root@jamza_vm_master_litepaas ~]# docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+0c957ecc885b        bridge              bridge              local
+a90e19dd9f74        docker_gwbridge     bridge              local
+032c767b11de        host                host                local
+d63876ae0ok1        ingress             overlay             swarm
+m0tshnpaclxk        mynet               overlay             swarm
+cad8d79e6d05        none                null                local
+ 
+ 
+ 
+ 
+ 
+ 改变网段 /etc/docker/daemon.json
+ 
+ {
+  "debug" : true,
+  "default-address-pools" : [
+    {
+      "base" : "12.11.0.0/16",
+      "size" : 24
+    }
+  ]
+}
+ 
+ 
+ networks:
+          kanban:
+            ipv4_address: 172.20.1.5
+    expose:
+      - "9003"
+    ports:
+      - "9003:9003"
+
+networks:
+    kanban:
+     driver: overlay
+     attachable: true
+     ipam:
+      config:
+        - subnet: 172.20.1.0/24
+        
+        
+        
+  创建STATIC IP 
+  
+  注意利用已创建好的网络，default使用
+  https://forums.docker.com/t/docker-swarm-1-13-static-ips-for-containers/28060
+     
  

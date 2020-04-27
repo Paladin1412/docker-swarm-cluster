@@ -1,0 +1,255 @@
+ 
+ 总结以下3步：
+ 
+ step1: docker swarm init
+        docker swarm join-token manager
+        docker swarm join --token
+        
+ step2: docker network create  --driver overlay --attachable --subnet 172.17.20.1/24 --opt encrypted  zhiwei
+
+ step3: docker-compose.yml 配置 
+ 
+ 
+ step4 : docker stack deploy 或者 docker-compose 启动服务
+ 
+ 
+ 使用自定义网络，固定IP，就使用IP：端口访问其他容器
+ 使用自定义网络， 不固定IP，就使用容器名称：端口访问其他容器
+ 
+ 
+
+1, docker2, root@39.102.48.153
+scp -r  /Users/zhangxiao/Desktop/nginx-goodies-nginx-sticky-module-ng-08a395c66e42.tar.gz root@39.102.48.153:/mnt/zw-docker/
+
+ 内网 172.17.20.50, eth0: 172.17.20.50, (docker1) 
+ 内网 172.17.20.51, eth0: 172.17.20.51 (docker2) Leader
+  
+  2, docker2执行 
+  
+  docker swarm init --advertise-addr  172.17.20.51
+  
+  docker swarm join-token manager 
+  
+  3, docker1上执行 ：
+  
+   docker swarm join --token SWMTKN-1-2bmu83i284e12ro1ubh43a6ytr3v5s0h4ct53pn2dvu2tnsa6o-6bo5soh9kmhl4cld25upe47gr 172.17.20.51:2377ss
+  4, Leader节点运行： docker node ls
+  
+  docker node ls
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+mujeva2pfgammpg99uf9n9hup     docker1             Ready               Active                                  19.03.8
+uf3ibh466nbqhaxzkvjhlbntu *   docker2             Ready               Active              Leader              19.03.8
+
+5, docker hub log on 
+
+docker login registry.cn-beijing.aliyuncs.com/
+
+6,主节点执行 $docker info 
+
+Is Manager: true
+  ClusterID: 7zmw3t33lbbuimqqsvy3dvazj
+  Managers: 1
+  Nodes: 2
+  Default Address Pool: 10.0.0.0/8  
+  SubnetSize: 24
+  Data Path Port: 4789
+
+7, docker network create  --driver overlay --attachable --subnet 172.17.20.1/24 --opt encrypted  zhiwei
+
+先查看有无网络zhiwei占用
+docker network ls 
+
+NETWORK ID          NAME                DRIVER              SCOPE
+6de31396078e        bridge              bridge              local
+ad22fbddc14e        docker_gwbridge     bridge              local
+6d3e25a357c3        host                host                local
+xeg4jhndrbco        ingress             overlay             swarm
+4cbaffed0efe        none                null                local
+40yq3xvk50ik        zhiwei              overlay             swarm
+
+8,  docker1镜像 ， probe1:0.1,  docker2镜像, probe2:01
+
+    （1） docker1镜像 ， probe1:0.1 使用地址：172.17.20.11
+    
+    （2） docker2镜像 ， probe2:0.1 使用地址：172.17.20.12
+
+
+
+9, docker2 , /mnt/zw-docker/probe2
+
+cd /mnt/zw-docker   registry.cn-beijing.aliyuncs.com
+
+$docker build -t registry.cn-beijing.aliyuncs.com/agilean/probe2:0.1 .
+
+$docker push registry.cn-beijing.aliyuncs.com/agilean/probe2:0.1
+
+docker1 
+cd /mnt/zw-docker/probe1
+
+$docker build -t registry.cn-beijing.aliyuncs.com/agilean/probe1:0.1 .
+
+$docker push registry.cn-beijing.aliyuncs.com/agilean/probe1:0.1
+
+
+$docker build -t registry.cn-beijing.aliyuncs.com/agilean/zhiwei-nginx:0.1 .
+
+$docker push registry.cn-beijing.aliyuncs.com/agilean/zhiwei-nginx:0.1
+
+
+
+
+
+环境变量
+
+export PREFIX=registry.cn-beijing.aliyuncs.com/agilean
+
+echo 'export PREFIX=registry.cn-beijing.aliyuncs.com/agilean' >> /etc/profile
+source /etc/profile
+
+注意利用已创建好的网络，default使用
+
+
+  https://forums.docker.com/t/docker-swarm-1-13-static-ips-for-containers/28060
+   
+ https://titangene.github.io/article/networking-in-docker-compose.html
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+version: "3.3"
+#version: "2"
+
+services:
+  probe2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: "${PREFIX}/probe2:0.1"
+    container_name: prob2
+    hostname: probe2
+    volumes:
+     - "/mnt/zw-docker/files/probe2:/data/zhiwei/probe2"
+    privileged: true
+    restart: always
+    networks:
+      default:
+        ipv4_address: 172.17.20.12
+    expose:
+      - "9004"
+    ports:
+      - "9004:9004"
+networks:
+   default:
+     external:
+       name: zhiwei
+
+
+
+
+
+                     
+ 
+ docker stack deploy   -c docker-compose.yml  'zk'
+ 
+ docker stack deploy probe2  -c docker-compose.yml
+ 
+ docker stack deploy zk  -c docker-compose.yml
+ 
+ docker service ps  --format '{{ ERROR}}' probe1_probe1  
+ 
+ docker inspect --format '{{ .NetworkSettings.IPAddress }}' <container-ID>
+ 
+ 
+ docker stack deploy   -c docker-compose.yml nginx
+ 
+ 
+ 
+ $docker build -t registry.cn-beijing.aliyuncs.com/agilean/zhiwei-nginx:0.1 .
+ 
+ 
+ 参考文献：
+ 
+ 
+ 
+ https://docs.docker.com/network/network-tutorial-overlay/
+ 
+ https://docs.docker.com/network/network-tutorial-overlay/#use-user-defined-bridge-networks
+ 
+ 
+ https://docs.docker.com/network/network-tutorial-overlay/#use-a-user-defined-overlay-network
+ 
+ 
+ 
+ docker network inspect 
+ 
+ 查询网络zhiwei的虚拟IP：
+ 
+ docker service inspect --format='{{json .Endpoint.VirtualIPs}}' <SERVICE_NAME>
+ 
+ 
+ docker exec -it <ID> /bin/sh
+ 
+ # ip addr
+ 
+ 
+ docker service create --name <NAME> --network <NET_WORK> IMAGE:TAG
+      
+ 通常Docker官方推荐使用dig，nslookup或其它DNS查询工具来查询通过DNS对服务名的访问。因为VIP是逻辑IP，ping并不是确认VIP连通性的正确的工具。
+ 
+ 
+ 
+ docker stack rm 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ docker tag sameersbn/redis:4.0.9-3 ${PREFIX}/sameersbn/redis:4.0.9-3
+ 
+ docker push ${PREFIX}/sameersbn/redis:4.0.9-3
+ 
+ docker tag wurstmeister/kafka ${PREFIX}/wurstmeister/kafka
+ 
+ docker push ${PREFIX}/wurstmeister/kafka
+ 
+ docker tag sheepkiller/kafka-manager ${PREFIX}/sheepkiller/kafka-manager
+ 
+ docker push  ${PREFIX}/sheepkiller/kafka-manager
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ (1) default.conf
+ 
+ /etc/nginx/conf.d/default.conf
+ 
+ (2)/etc/nginx/nginx
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 

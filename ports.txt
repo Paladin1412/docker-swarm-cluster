@@ -1,0 +1,21 @@
+view=8882
+history=8895
+kanban=8880
+multi=8887
+notification=8892
+nstats=8894
+query=8896   
+rbac=8883  
+schema=8890   
+view=8882    
+api=8884 
+card=8886
+devops=8893    
+nysync=8891
+mysql=13306
+#root,admin, admin,admin, zhiwei
+redis=6379 
+kafka=9002,9003
+kafka-manager=9000 
+nginx=80    
+zk=2181
