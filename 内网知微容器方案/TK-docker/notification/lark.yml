@@ -1,0 +1,8 @@
+appId: cli_9ece0e51b33dd107
+appSecret: 5UNuuPNXy7ssI8j3VAfZgf4EJhBw5gvp
+
+apiToken: https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal/
+apiGetUserId: https://open.feishu.cn/open-apis/user/v1/batch_get_id
+apiBatchSend: https://open.feishu.cn/open-apis/message/v4/batch_send/
+apiSingleSend: https://open.feishu.cn/open-apis/message/v4/send/
+apiGetGroupId: https://open.feishu.cn/open-apis/chat/v4/list

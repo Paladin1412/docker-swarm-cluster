@@ -1,0 +1,57 @@
+server:
+  port: 8891
+  tomcat:
+    max-threads: 3
+spring:
+  application:
+    name: nsync-server
+  jmx:
+    enabled: false
+  redis:
+    host: zhiwei-redis
+    password: kanban
+    database: 12
+  datasource:
+    url: jdbc:mysql://zhiwei-mysql/kanban?characterEncoding=utf8
+    username: kanban
+    password: kanbanAg
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+  mail:
+    host: smtp.mxhichina.com
+    username: zhouxn@agilean.cn
+    password: eHealth254
+    test-connection: false
+    protocol: smtp
+    port: 25
+    jndi-name: null
+    default-encoding: UTF-8
+    properties:
+      mail.smtp.auth: true
+
+security:
+  basic:
+    path:
+    - /admin/**
+sync:
+  mapping: /root/kanban/testcase.json
+  plugins: /root/kanban/plugins/sync-plugins
+  maxPoolSize: 1000
+  corePoolSize: 800
+  queueCapacity: 1000
+  enabled: true
+  default-recipients:
+  default-from :
+  subject-prefix:
+  jira:
+    enabled: false
+    jira-admin-username: admin
+    jira-admin-password: CwCFDn1hlaiRYfyzThIcg
+    jira-base-url: http://101.201.249.62:8080
+    jira-user-password: CwCFDn1hlaiRYfyzThIcg
+    cas-enabled: false
+    custom-reporter: true
+  dlm:
+    enabled: false

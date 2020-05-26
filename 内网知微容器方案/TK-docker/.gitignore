@@ -1,0 +1,6 @@
+redis/*.rdb
+**/*.jar
+*.jar
+**/*.tar.gz
+**/*.zip
+

@@ -1,0 +1,282 @@
+config:
+  props:
+    domainMap:
+      pingan.com.cn: http://kanban.paic.com.cn
+app:
+  mail:
+    teamInviteMember:   #团队邀请成员
+      subject: 您已被邀请加入到 [${teamName}] 团队
+      content: |
+        <div style="font-size:0.7rem;">
+            <p>您好 <span id="uuid--${vuId}--uuid">${toNickName}</span>，</p>
+            <div style="padding-left:20px">
+                <p>您已被 <font style="font-weight:bold;">${userNickName}</font> 邀请加入到 <font style="font-weight:bold;">[${teamName}]</font> 团队中</p>
+                <br/>
+                <p><a href="${defaultDomain}" style="padding:0.6rem 3rem;background-color:#8a5bdc;color:white;text-decoration:none;border-radius:2px;">前往查看</a></p>
+                <p>如果有任何问题，请联系 <font style="font-weight:bold;color:#0077ff">service@agilean.cn</font>，或者添加微信公众号“<font style="font-weight:bold;color:#0077ff">Agilean</font>”</p>
+            </div>
+        </div>
+
+    cardForStepOwner:   #负责人变更
+      subject: ${cardCode} [${cardName}] | 您已被指定为负责人
+      content: |
+        <div style="font-size:0.7rem;">
+            <p>您好 <span id="uuid--${vuId}--uuid">${toNickName}</span>，</p>
+            <div style="padding-left:20px">
+                <p>您已被 <font style="font-weight:bold;">${userNickName}</font> 指定为 <font style="font-weight:bold;">${cardCode} [${cardName}]</font> 的当前负责人</p>
+                <br/>
+                <p><a href="${defaultDomain}/#/?viewId=whole&vuId=${vuId}" style="padding:0.6rem 3rem;background-color:#8a5bdc;color:white;text-decoration:none;border-radius:2px;">前往查看</a></p>
+                <p>如果有任何问题，请联系 <font style="font-weight:bold;color:#0077ff">service@agilean.cn</font>，或者添加微信公众号“<font style="font-weight:bold;color:#0077ff">Agilean</font>”</p>
+            </div>
+        </div>
+
+    blockForOwner:   #阻塞通知卡片负责人
+      subject: ${cardCode} [${cardName}] | 您负责的卡片已被阻塞
+      content: |
+        <div style="font-size:0.7rem;">
+            <p>您好 <span id="uuid--${vuId}--uuid">${toNickName}</span>，</p>
+            <div style="padding-left:20px">
+                <p>您负责的卡片 <font style="font-weight:bold;">${cardCode} [${cardName}]</font> 已被阻塞</p>
+                <p>阻塞原因： ${blockReason}</p>
+                <p>求助对象： ${blockOwner}</p>
+                <br/>
+                <p><a href="${defaultDomain}/#/?viewId=whole&vuId=${vuId}" style="padding:0.6rem 3rem;background-color:#8a5bdc;color:white;text-decoration:none;border-radius:2px;">前往查看</a></p>
+                <p>如果有任何问题，请联系 <font style="font-weight:bold;color:#0077ff">service@agilean.cn</font>，或者添加微信公众号“<font style="font-weight:bold;color:#0077ff">Agilean</font>”</p>
+            </div>
+        </div>
+
+    blockForBlockOwner:   #阻塞通知求助对象
+      subject: ${cardCode} [${cardName}] | 卡片已经被阻塞，设置了您为求助对象
+      content: |
+        <div style="font-size:0.7rem;">
+            <p>您好 <span id="uuid--${vuId}--uuid">${toNickName}</span>，</p>
+            <div style="padding-left:20px">
+                <p>卡片 <font style="font-weight:bold;">${cardCode}${cardName}</font> 已经被阻塞，设置了您为求助对象</p>
+                <p>阻塞原因： ${blockReason}</p>
+                <br/>
+                <p><a href="${defaultDomain}/#/?viewId=whole&vuId=${vuId}" style="padding:0.6rem 3rem;background-color:#8a5bdc;color:white;text-decoration:none;border-radius:2px;">前往查看</a></p>
+                <p>如果有任何问题，请联系 <font style="font-weight:bold;color:#0077ff">service@agilean.cn</font>，或者添加微信公众号“<font style="font-weight:bold;color:#0077ff">Agilean</font>”</p>
+            </div>
+        </div>
+
+    unblockForBlockOwner:   #解除阻塞通知求助对象
+      subject: ${cardCode} [${cardName}] | 该卡已经解除阻塞
+      content: |
+        <div style="font-size:0.7rem;">
+            <p>您好 <span id="uuid--${vuId}--uuid">${toNickName}</span>，</p>
+            <div style="padding-left:20px">
+                <p><font style="font-weight:bold;">${cardCode}${cardName}</font> 已经解除阻塞</p>
+                <p>原阻塞原因： ${blockReason}</p>
+                <br/>
+                <p><a href="${defaultDomain}/#/?viewId=whole&vuId=${vuId}" style="padding:0.6rem 3rem;background-color:#8a5bdc;color:white;text-decoration:none;border-radius:2px;">前往查看</a></p>
+                <p>如果有任何问题，请联系 <font style="font-weight:bold;color:#0077ff">service@agilean.cn</font>，或者添加微信公众号“<font style="font-weight:bold;color:#0077ff">Agilean</font>”</p>
+            </div>
+        </div>
+
+    unblockForOwner:   #解除阻塞通知卡片负责人
+      subject: ${cardCode} [${cardName}] | 该卡已经解除阻塞
+      content: |
+        <div style="font-size:0.7rem;">
+            <p>您好 <span id="uuid--${vuId}--uuid">${toNickName}</span>，</p>
+            <div style="padding-left:20px">
+                <p><font style="font-weight:bold;">${cardCode}${cardName}</font> 已经解除阻塞</p>
+                <p>原阻塞原因： ${blockReason}</p>
+                <br/>
+                <p><a href="${defaultDomain}/#/?viewId=whole&vuId=${vuId}" style="padding:0.6rem 3rem;background-color:#8a5bdc;color:white;text-decoration:none;border-radius:2px;">前往查看</a></p>
+                <p>如果有任何问题，请联系 <font style="font-weight:bold;color:#0077ff">service@agilean.cn</font>，或者添加微信公众号“<font style="font-weight:bold;color:#0077ff">Agilean</font>”</p>
+            </div>
+        </div>
+
+    addCommentForRelatedUser:   #添加新评论为相关人
+      subject: ${cardCode} [${cardName}] | ${userNickName}在评论中@了你
+      content: |
+        <div style="font-size:0.7rem;">
+            <p>您好 <span id="uuid--${vuId}--uuid">${toNickName}</span>，</p>
+            <div style="padding-left:20px">
+                <p><font style="font-weight:bold;">${userNickName}</font> 在 <font style="font-weight:bold;">${cardCode} [${cardName}]</font> 评论中@了你</p>
+                <p style="padding-left:30px;font-size:0.9rem">“${content}”</p>
+                <p>历史评论:</p>
+                <div style="border-left:5px solid #eee;padding:0 15px;">
+                    ${historyContent}
+                </div>
+                <br/>
+                <p><a href="${defaultDomain}/#/?viewId=whole&vuId=${vuId}" style="padding:0.6rem 3rem;background-color:#8a5bdc;color:white;text-decoration:none;border-radius:2px;">前往查看</a></p>
+                <p>或者可以直接回复邮件，参与讨论</p>
+                <p>如果有任何问题，请联系 <font style="font-weight:bold;color:#0077ff">service@agilean.cn</font>，或者添加微信公众号“<font style="font-weight:bold;color:#0077ff">Agilean</font>”</p>
+            </div>
+        </div>
+
+    updateCommentForRelatedUser:   #修改评论为相关人
+      subject: ${cardCode} [${cardName}] | ${userNickName}修改了评论
+      content: |
+        <div style="font-size:0.7rem;">
+            <p>您好 <span id="uuid--${vuId}--uuid">${toNickName}</span>，</p>
+            <div style="padding-left:20px">
+                <p><font style="font-weight:bold;">${userNickName}</font> 修改了 <font style="font-weight:bold;">${cardCode} [${cardName}]</font> 的评论</p>
+                <p style="padding-left:30px;font-size:0.9rem">新评论内容：“${content}”</p>
+                <p style="padding-left:30px;font-size:0.9rem">原评论内容：“${oldContent}”</p>
+                <p>历史评论:</p>
+                <div style="border-left:5px solid #eee;padding:0 15px;">
+                    ${historyContent}
+                </div>
+                <br/>
+                <p><a href="${defaultDomain}/#/?viewId=whole&vuId=${vuId}" style="padding:0.6rem 3rem;background-color:#8a5bdc;color:white;text-decoration:none;border-radius:2px;">前往查看</a></p>
+                <p>或者可以直接回复邮件，参与讨论</p>
+                <p>如果有任何问题，请联系 <font style="font-weight:bold;color:#0077ff">service@agilean.cn</font>，或者添加微信公众号“<font style="font-weight:bold;color:#0077ff">Agilean</font>”</p>
+            </div>
+        </div>
+
+    abandonForOwner:   #丢弃通知非自己的创建人、卡片负责人
+      subject: ${cardCode} [${cardName}] | ${userNickName}丢弃该卡
+      content: |
+        <div style="font-size:0.7rem;">
+            <p>您好 <span id="uuid--${vuId}--uuid">${toNickName}</span>，</p>
+            <div style="padding-left:20px">
+                <p><font style="font-weight:bold;">${cardCode} [${cardName}]</font> 已被 <font style="font-weight:bold;">${userNickName}</font> 丢弃</p>
+                <p>丢弃原因： ${abandonReason}</p>
+                <br/>
+                <p><a href="${defaultDomain}/#/?viewId=whole&vuId=${vuId}" style="padding:0.6rem 3rem;background-color:#8a5bdc;color:white;text-decoration:none;border-radius:2px;">前往查看</a></p>
+                <p>如果有任何问题，请联系 <font style="font-weight:bold;color:#0077ff">service@agilean.cn</font>，或者添加微信公众号“<font style="font-weight:bold;color:#0077ff">Agilean</font>”</p>
+            </div>
+        </div>
+    passwordInit:
+      subject: 知微密码重置
+      content: |
+        亲爱的 ${nickName}，您好！
+        <br/><br/>
+        管理员重置了您的密码，登陆请使用默认密码，请及时修改密码：<br/>
+        <font style="font-weight:bold;font-size:18">默认密码：${defaultPass}</font>
+        <br/><br/>
+        <font style="font-weight:bold;">知微</font>是目前业界最有效的企业价值交付管理工具，您即将使用的为基础版本，诸多功能仍在完善优化之中。如使用中遇到任何问题，可发送邮件至<font style="font-weight:bold;">service@agilean.cn</font>，我们将尽快为您提供协助。同时，您的宝贵建议，也将帮助我们越做越好。
+        <br/><br/>
+        期待您加入<font style="font-weight:bold;">知微</font>社区，与我们共同开启这段精彩旅程！
+        <br/><br/>
+        知微 团队<br/>
+    passwordReset:
+      subject: 知微密码重置，请于48小时内完成
+      content: |
+        亲爱的 ${nickName}，您好！
+        <br/><br/>
+        您于 <font style="font-weight:bold;">${dt}</font> 申请重置密码，请点击以下链接重置：<br/>
+        <a href="${defaultDomain}/#/password-admin?r=${code}">${defaultDomain}/#/password-admin?r=${code}</a>
+        <br/><br/>
+        为了保障您的帐号安全，该链接将在密码修改完成后失效，链接有效期为<font style="font-weight:bold;">48小时</font>。如果您不想更换密码，忽略此邮件即可。
+        <br/><br/>
+        此邮件为 <font style="font-weight:bold;">知微</font> 的自动提醒，无需回复。如有任何问题，可发送邮件至<font style="font-weight:bold;">service@agilean.cn</font>，我们将尽快为您提供协助。
+        <br/><br/>
+        知微 团队<br/>
+    inviteCode:
+      subject: 欢迎您注册知微
+      content: |
+        亲爱的 ${nickName}，您好！
+        <br/><br/>
+        祝贺您成为<font style="font-weight:bold;">知微</font>的首批用户！请点击以下链接，激活您的账户：<br/>
+        <a href="${defaultDomain}/#/signup?code=${code}" style="color:#048c89;">${defaultDomain}/#/signup?code=${code}</a>
+        <font style="font-style:italic;">（如果此操作不是由您发起的，请忽略此邮件即可。）</font>
+        <br/><br/>
+        您即将使用的工具为基础版本，诸多功能仍在完善优化之中。如使用中遇到任何问题，可发送邮件至<font style="font-weight:bold;">service@agilean.cn</font>，我们将尽快为您提供协助。同时，期待您的宝贵建议，帮助我们越做越好。
+        <br/><br/>
+        再次欢迎您加入<font style="font-weight:bold;">知微</font>社区，与我们共同开启这段精彩旅程！
+        <br/><br/>
+        知微 团队<br/>
+    inviteToOrg:
+      subject: ${fromUser} 邀请您加入 ${orgName} 组织
+      content: |-
+        亲爱的 ${nickName}，您好！
+        <br/><br/>
+        <font style="font-weight:bold;">${fromUser}</font> 邀请您加入组织 <font style="font-weight:bold;">${orgName}</font>，请点击以下链接进入：<br/>
+        <a href="${defaultDomain}">${defaultDomain}</a>
+        <br/><br/>
+        此邮件为<font style="font-weight:bold;">知微</font>的自动提醒，无需回复。如有任何问题，可发送邮件至<font style="font-weight:bold;">service@agilean.cn</font>，我们将尽快为您提供协助。
+        <br/><br/>
+        知微 团队<br/>
+    inviteToOrgInitUser:
+      subject: ${fromUser} 邀请您加入 ${orgName} 组织
+      content: |-
+        亲爱的 ${nickName}，您好！
+        <br/><br/>
+        <font style="font-weight:bold;">${fromUser}</font> 正在使用<font style="font-weight:bold;">知微</font>工具，邀请您加入组织 <font style="font-weight:bold;">${orgName}</font>。请点击以下链接登录账户：<br/>
+        <a href="${defaultDomain}/">${defaultDomain}/</a>
+        <br/><br/>
+        首次登陆请使用默认密码，请及时修改密码：<br/>
+        <font style="font-weight:bold;font-size:18">默认密码：${defaultPass}</font>
+        <br/><br/>
+        请扫描以下二维码，下载移动端APP:<br/>
+        <img src="${defaultDomain}/static/images/appdownload.0b23b960.png" width="140" height="140">
+        <br/><br/>
+        <font style="font-weight:bold;">知微</font>是目前业界最有效的企业价值交付管理工具，您即将使用的为基础版本，诸多功能仍在完善优化之中。如使用中遇到任何问题，可发送邮件至<font style="font-weight:bold;">service@agilean.cn</font>，我们将尽快为您提供协助。同时，您的宝贵建议，也将帮助我们越做越好。
+        <br/><br/>
+        期待您加入<font style="font-weight:bold;">知微</font>社区，与我们共同开启这段精彩旅程！
+        <br/><br/>
+        知微 团队<br/>
+    passwordResetWithOrgDomain:
+      subject: 知微密码重置，请于48小时内完成
+      content: |
+        亲爱的 ${nickName}，您好！
+        <br/><br/>
+        您于 <font style="font-weight:bold;">${dt}</font> 申请重置密码，请点击以下链接重置：<br/>
+        如果正在使用内网请点击以下链接：<br/>
+        <a href="${orgDomain}/#/password-admin?r=${code}">${orgDomain}/#/password-admin?r=${code}</a><br/>
+        如果有外网权限，也可以使用以下链接：<br/>
+        <a href="${defaultDomain}/#/password-admin?r=${code}">${defaultDomain}/#/password-admin?r=${code}</a><br/>
+        <br/>
+        为了保障您的帐号安全，该链接将在密码修改完成后失效，链接有效期为<font style="font-weight:bold;">48小时</font>。如果您不想更换密码，忽略此邮件即可。
+        <br/><br/>
+        此邮件为 <font style="font-weight:bold;">知微</font> 的自动提醒，无需回复。如有任何问题，可发送邮件至<font style="font-weight:bold;">service@agilean.cn</font>，我们将尽快为您提供协助。
+        <br/><br/>
+        知微 团队<br/>
+    inviteCodeWithOrgDomain:
+      subject: 欢迎您注册知微
+      content: |
+        亲爱的 ${nickName}，您好！
+        <br/><br/>
+        祝贺您成为<font style="font-weight:bold;">知微</font>的首批用户！请点击以下链接，激活您的账户：<br/>
+        如果正在使用内网请点击以下链接：<br/>
+        <a href="${orgDomain}/#/signup?code=${code}" style="color:#048c89;">${orgDomain}/#/signup?code=${code}</a>
+        <font style="font-style:italic;">（如果此操作不是由您发起的，请忽略此邮件即可。）</font><br/>
+        如果有外网权限，也可以使用以下链接：<br/>
+        <a href="${defaultDomain}/#/signup?code=${code}" style="color:#048c89;">${defaultDomain}/#/signup?code=${code}</a>
+        <font style="font-style:italic;">（如果此操作不是由您发起的，请忽略此邮件即可。）</font><br/>
+        <br/>
+        您即将使用的工具为基础版本，诸多功能仍在完善优化之中。如使用中遇到任何问题，可发送邮件至<font style="font-weight:bold;">service@agilean.cn</font>，我们将尽快为您提供协助。同时，期待您的宝贵建议，帮助我们越做越好。
+        <br/><br/>
+        再次欢迎您加入<font style="font-weight:bold;">知微</font>社区，与我们共同开启这段精彩旅程！
+        <br/><br/>
+        知微 团队<br/>
+    inviteToOrgWithOrgDomain:
+      subject: ${fromUser} 邀请您加入 ${orgName} 组织
+      content: |-
+        亲爱的 ${nickName}，您好！
+        <br/><br/>
+        <font style="font-weight:bold;">${fromUser}</font> 邀请您加入组织 <font style="font-weight:bold;">${orgName}</font>，请点击以下链接进入：<br/>
+        如果正在使用内网请点击以下链接：<br/>
+        <a href="${orgDomain}">${orgDomain}</a><br/>
+        如果有外网权限，也可以使用以下链接：<br/>
+        <a href="${defaultDomain}">${defaultDomain}</a><br/>
+        <br/>
+        此邮件为<font style="font-weight:bold;">知微</font>的自动提醒，无需回复。如有任何问题，可发送邮件至<font style="font-weight:bold;">service@agilean.cn</font>，我们将尽快为您提供协助。
+        <br/><br/>
+        知微 团队<br/>
+    inviteToOrgInitUserWithOrgDomain:
+      subject: ${fromUser} 邀请您加入 ${orgName} 组织
+      content: |-
+        亲爱的 ${nickName}，您好！
+        <br/><br/>
+        <font style="font-weight:bold;">${fromUser}</font> 正在使用<font style="font-weight:bold;">知微</font>工具，邀请您加入组织 <font style="font-weight:bold;">${orgName}</font>。请点击以下链接登录账户：<br/>
+        如果正在使用内网请点击以下链接：<br/>
+        <a href="${orgDomain}/">${orgDomain}/</a>
+        <br/><br/>
+        如果有外网权限，也可以使用以下链接：<br/>
+        <a href="${defaultDomain}/">${defaultDomain}/</a><br/>
+        <br/><br/>
+        首次登陆请使用默认密码，请及时修改密码：<br/>
+        <font style="font-weight:bold;font-size:18">默认密码：${defaultPass}</font>
+        <br/><br/>
+        请扫描以下二维码，下载移动端APP:<br/>
+        <img src="${defaultDomain}/static/images/appdownload.0b23b960.png" width="140" height="140">
+        <br/><br/>
+        <font style="font-weight:bold;">知微</font>是目前业界最有效的企业价值交付管理工具，您即将使用的为基础版本，诸多功能仍在完善优化之中。如使用中遇到任何问题，可发送邮件至<font style="font-weight:bold;">service@agilean.cn</font>，我们将尽快为您提供协助。同时，您的宝贵建议，也将帮助我们越做越好。
+        <br/><br/>
+        期待您加入<font style="font-weight:bold;">知微</font>社区，与我们共同开启这段精彩旅程！
+        <br/><br/>
+        知微 团队<br/>

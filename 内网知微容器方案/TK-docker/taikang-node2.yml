@@ -1,0 +1,85 @@
+
+version: "3.0"
+services:
+  
+  
+  #8883,rbac
+  zhiwei-rbac:
+    build:
+      context: ./rbac/
+      dockerfile: Dockerfile
+
+    container_name: "zhiwei-rbac"
+    image: "zhiwei-rbac:0.1"
+    networks:
+      default:
+    volumes:
+       - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+       - "/data/zw-docker/files/lucene:/tmp/lucene"
+       - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+       - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    #expose:
+    #  - "8883"
+    ports:
+      - "8883:8883"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web02]
+    restart: always
+    
+  #8895,history
+  zhiwei-history:
+    build:
+      context: ./history/
+      dockerfile: Dockerfile
+
+    container_name: "zhiwei-history"
+    image: "zhiwei-history:0.1"
+    networks:
+      default:
+    volumes:
+        - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+        - "/data/zw-docker/files/lucene:/tmp/lucene"
+        - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+        - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    #expose:
+    #  - "8895"
+    ports:
+      - "8895:8895"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web02]
+    restart: always  
+  
+  #8882,view
+  zhiwei-view:
+    build:
+      context: ./view/
+      dockerfile: Dockerfile
+
+    container_name: "zhiwei-view"
+    image: "zhiwei-view:0.1"
+    networks:
+      default:
+    volumes:
+       - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+       - "/data/zw-docker/files/lucene:/tmp/lucene"
+       - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+       - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    #expose:
+    #  - "8882"
+    
+    ports:
+      - "8882:8882"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web02]
+
+    restart: always
+  
+  
+networks:
+   default:
+     external:
+       name: zhiwei
+

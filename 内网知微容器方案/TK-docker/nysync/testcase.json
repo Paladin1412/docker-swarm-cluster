@@ -1,0 +1,101 @@
+{
+  "sync": {
+    "adapters": [
+      {
+        "name": "testcase",
+        "interval": 43200000,
+        "delay":3000,
+        "url": "/api/v1/sync/testcase",
+        "adapter": "cn.agilean.sync.testcase.TestCaseAdaptor",
+        "config": {
+          "repository": "/usr/local/git/kanban/zw-test",
+          "branch": "scrum",
+          "scanDir": "gauge-test/specs-jira,gauge-test/specs/specs-bizrule,gauge-test/specs/specs-linktype,gauge-test/specs/specs-formula,gauge-test/specs-service,gauge-test/specs-regression,gauge-test/specs-core,gauge-test/specs-sync"
+        }
+      },
+      {
+        "name": "zhiwei",
+        "url": "/api/v1/sync/hook",
+        "adapter": "cn.agilean.sync.kanban.ValueUnitAdapter"
+      }
+    ],
+    "strategies": [
+      {
+        "type": "unidirectional",
+        "from": "testcase",
+        "to": "zhiwei"
+      },
+      {
+        "type": "bidirectional",
+        "adapters": [
+          "zhiwei",
+          "jira"
+        ]
+      }
+    ]
+  },
+  "orgId": "771ac1a5-fca5-4af2-b744-27b16e989b18",
+  "user": "test@agilean.cn",
+  "streams": [
+    {
+      "id": "971006bc-ca40-41e0-a3e3-f3435df352f4",
+      "steps": [
+        {
+          "id": "c3b82a09f45d49d1b17cf0b60e0f38cd",
+          "status": [
+            {
+              "id": "e668d09de42d4742986e7248f00c5a8c"
+            }
+          ]
+        },
+        {
+          "id": "410cb295a6ca4aacb8ec7a428e3ca043",
+          "status": [
+            {
+              "id": "a72596b2a387492da135d2c931410106"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "vuts": [
+    {
+      "id": "31d85e0eada54e72b2aeb8ebebbf4692"
+    }
+  ],
+  "containers": [
+    {
+      "id": "03dbeb7df89a47609baf6b91b1382b5c",
+      "pairs": [
+        {
+          "vut": "31d85e0eada54e72b2aeb8ebebbf4692",
+          "stream": "971006bc-ca40-41e0-a3e3-f3435df352f4"
+        }
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "id": "66c21078faa142e5b5710854b90c7542",
+      "type": "ENUM"
+    }
+  ],
+  "links": [
+    {
+      "id": "0d4572d820744207912ed680295945d1",
+      "opponentVutId": "88d07743edcf4f88b0a50c538c44e831",
+      "opponentPosition": "Dest"
+    }
+  ],
+  "externals": [
+    {
+      "external": "testcase",
+      "vut": "31d85e0eada54e72b2aeb8ebebbf4692",
+      "stream": "971006bc-ca40-41e0-a3e3-f3435df352f4",
+      "lsu": {
+        "container": "03dbeb7df89a47609baf6b91b1382b5c"
+      }
+    }
+  ]
+}

@@ -1,0 +1,171 @@
+
+version: "3.0"
+services:
+ #8896,query
+ zhiwei-query:
+    build:
+      context: ./query/
+      dockerfile: Dockerfile
+
+    container_name: "zhiwei-query"
+    image: "zhiwei-query:0.1"
+    networks:
+      default:
+    volumes:
+       - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+       - "/data/zw-docker/files/lucene:/tmp/lucene"
+       - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+       - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    expose:
+      - "8896"
+    ports:
+      - "8896:8896"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web04]
+    restart: always 
+    
+   
+ zhiwei-mysql:
+    container_name: zhiwei-mysql
+    restart: unless-stopped
+    build:
+      context: ./mysql/
+      dockerfile: Dockerfile
+    #image: "mysql:5.7"
+    image: "zhiwei-mysql:0.1"
+    hostname: zhiwei-mysql
+    networks:
+      default:
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=agilean@2020
+      - MYSQL_USER=kanban
+      - MYSQL_PASSWORD=kanbanAg
+      - MYSQL_DATABASE=kanban
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web04]	
+    #volumes:
+    #  - "/mnt/zw-docker/files/mysql:/var/lib/mysql"
+    #   here, put your scripts
+    #   - "/mnt/zw-docker/files/mysql-scripts/:/docker-entrypoint-initdb.d/"
+    #  - "/mnt/zw-docker/files/mysql-conf/mysql:/etc/mysql"
+ 
+ 
+ #redis,6379
+ zhiwei-redis:
+    container_name: "zhiwei-redis"
+    build:
+      context: ./redis/
+      dockerfile: Dockerfile
+    image: "zhiwei-redis:0.1"
+    command: redis-server /data/redis.conf
+    networks:
+     default:
+    ports:
+      - "6379:6379"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web04]
+    #volumes:
+    #    - "/mnt/zw-docker/files/redis/redis.conf:/data/redis.conf"
+    #    - "/mnt/zw-docker/files/redis/data:/data/db"
+    restart: always
+
+  
+ zhiwei-zookeeper:
+    build:
+      context: ./zookeeper/
+      dockerfile: Dockerfile
+    image: 'zhiwei-zookeeper:0.1'
+    #image: 'bitnami/zookeeper:3'
+    container_name: 'zhiwei-zookeeper'
+    ports:
+      - '2181:2181'
+    #expose:
+    # - '2181'
+    networks:
+     default:
+    #volumes:
+    #  - '/data/zhiwei/zookeeper:/bitnami/zookeeper'
+    environment:
+      - 'ALLOW_ANONYMOUS_LOGIN=yes'
+      - ZOO_ENABLE_AUTH=false
+      - 'zookeeper.volumePermissions.enabled=true'
+      #- ZOO_ENABLE_AUTH=yes
+      #- ZOO_SERVER_USERS=kafka
+      #- ZOO_SERVER_PASSWORDS=kafka_password
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web04]
+    restart: always
+
+ zhiwei-kafka:
+    #image: 'bitnami/kafka:2'
+    build:
+      context: ./kafka/
+      dockerfile: Dockerfile
+    image: 'zhiwei-kafka:0.1'
+    container_name: "zhiwei-kafka"
+    ports:
+      - '9092:9092'
+      - '2092:2092'     
+    #expose:
+    #  - '9092'
+    #  - '2092'
+    networks:
+      default:
+    #volumes:
+    #  - '/data/zhiwei/kafka/data:/bitnami/kafka'
+    environment:
+      #- ZOO_ENABLE_AUTH=yes
+      - KAFKA_DELETE_TOPIC_ENABLE=true
+      - 'ALLOW_ANONYMOUS_LOGIN=yes'
+      - ZOO_ENABLE_AUTH=false
+      - 'zookeeper.volumePermissions.enabled=true'
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zhiwei-zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_ADVERTISED_HOST_NAME=zhiwei-kafka
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:2092,PLAINTEXT_HOST://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://zhiwei-kafka:2092,PLAINTEXT_HOST://zhiwei-kafka:9092
+      #- KAFKA_ZOOKEEPER_USER=kafka
+      #- KAFKA_ZOOKEEPER_PASSWORD=kafka_password
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web04]
+    depends_on:
+      - zhiwei-zookeeper
+ #nginx, 80
+ zhiwei-nginx:
+    container_name: "zhiwei-nginx"
+    image: "zhiwei-nginx:0.1"
+    build:
+      context: ./nginx/
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "8870:8870"
+    expose:
+     - "80"
+     - "8870"
+    networks:
+      default:
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/log:/var/log/nginx
+      #- ./nginx/www:/var/www
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web04]
+    restart: unless-stopped
+    
+ 
+networks:
+   default:
+     external:
+       name: zhiwei
+

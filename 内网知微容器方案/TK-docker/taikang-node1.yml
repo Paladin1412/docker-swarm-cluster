@@ -1,0 +1,124 @@
+version: "3.0"
+services:
+
+  #nysync, 8891
+  zhiwei-nysync:
+    build:
+      context: ./nysync/
+      dockerfile: Dockerfile
+    container_name: "zhiwei-nysync"
+    image: "zhiwei-nysync:0.1"
+    networks:
+     default:
+    volumes:
+       - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+       - "/data/zw-docker/files/lucene:/tmp/lucene"
+       - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+       - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    restart: always
+    expose:
+      - "8891"
+    ports:
+      - "8891:8891" 
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web01]
+        
+  #8894,nstats
+  zhiwei-nstats:
+    build:
+      context: ./nstats/
+      dockerfile: Dockerfile
+
+    container_name: "zhiwei-nstats"
+    image: "zhiwei-nstats:0.1"
+    networks:
+       default:
+    volumes:
+       - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+       - "/data/zw-docker/files/lucene:/tmp/lucene"
+       - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+       - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    #expose:
+    #  - "8894"
+    ports:
+      - "8894:8894"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web01]
+    restart: always
+      
+  #card-write     
+  zhiwei-card-write:
+    build:
+      context: ./card-write/
+      dockerfile: Dockerfile
+    container_name: "zhiwei-card-write"
+    image: "zhiwei-card-write:0.1"
+    volumes:
+     - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+     - "/data/zw-docker/files/lucene:/tmp/lucene"
+     - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+     - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    restart: always
+    networks:
+      default:
+    ports:
+      - "9221:8886"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web01]
+        
+  #8886,card
+  zhiwei-card:
+    build:
+      context: ./card/
+      dockerfile: Dockerfile
+
+    container_name: "zhiwei-card"
+    image: "zhiwei-card-read:0.1"
+    networks:
+      default:
+    volumes:
+      - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+      - "/data/zw-docker/files/lucene:/tmp/lucene"
+      - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+      - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    ports:
+      - "9222:8886"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web01]
+    restart: always 
+ 
+ 
+  #8892,notification
+  zhiwei-notification:
+    build:
+      context: ./notification/
+      dockerfile: Dockerfile
+
+    container_name: "zhiwei-notification"
+    image: "zhiwei-notification:0.1"
+    networks:
+      default:
+    volumes:
+       - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+       - "/data/zw-docker/files/lucene:/tmp/lucene"
+       - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+       - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    #expose:
+    #  - "8892"
+    ports:
+      - "8892:8892"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web01]
+    restart: always
+    
+
+  
+networks:
+   default:
+     external:
+       name: zhiwei

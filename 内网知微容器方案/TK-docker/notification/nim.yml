@@ -1,0 +1,5 @@
+appkey: daadd9e27b86d8713f519055386584a0
+appSecret: d3ff6f140855
+apiMessage: https://api.netease.im/nimserver/msg/sendAttachMsg.action
+apiCommon: https://api.netease.im/nimserver/msg/sendMsg.action
+apiCreateAccount: https://api.netease.im/nimserver/user/create.action

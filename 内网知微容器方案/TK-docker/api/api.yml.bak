@@ -1,0 +1,5 @@
+config:
+  props:
+    hookMap:
+      544c6eaa273b41429547b169e3e3c2d3: http://10.30.109.118:8891/api/v1/hook
+  

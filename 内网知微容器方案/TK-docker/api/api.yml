@@ -1,0 +1,5 @@
+config:
+  props:
+    hookMap:
+      544c6eaa273b41429547b169e3e3c2d3: http://zhiwei-nysync:8891/api/v1/hook
+  

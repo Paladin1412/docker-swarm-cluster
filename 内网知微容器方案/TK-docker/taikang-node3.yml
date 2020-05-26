@@ -1,0 +1,155 @@
+version: "3.0"
+services:
+  
+  #8880,kanban
+  zhiwei-kanban:
+    build:
+      context: ./kanban/
+      dockerfile: Dockerfile
+    container_name: "zhiwei-kanban"
+    image: "zhiwei-kanban:0.1"
+    networks:
+      default:
+    volumes:
+       - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+       - "/data/zw-docker/files/lucene:/tmp/lucene"
+       - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+       - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    expose:
+      - "8880"
+    ports:
+      - "8880:8880"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web03]
+    restart: always
+    
+  #8884,api
+  zhiwei-api:
+    build:
+      context: ./api/
+      dockerfile: Dockerfile
+
+    container_name: "zhiwei-api"
+    image: "zhiwei-api:0.1"
+    networks:
+      default:
+    volumes:
+       - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+       - "/data/zw-docker/files/lucene:/tmp/lucene"
+       - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+       - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    expose:
+      - "8884"
+    ports:
+      - "8884:8884"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web03]
+    restart: always
+  
+  zhiwei-filter:
+    build:
+      context: ./filter/
+      dockerfile: Dockerfile
+    container_name: "zhiwei-filter"
+    image: "zhiwei-filter:0.1"
+    networks:
+     default:
+    volumes:
+      - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+      - "/data/zw-docker/files/lucene:/tmp/lucene"
+      - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+      - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+      # - "/mnt/zw-docker/files/filter:/data/zhiwei/filter"
+    restart: unless-stopped
+    expose:
+      - "8879"
+    ports:
+      - "8879:8879"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web03]
+        
+  #8890,schema
+  zhiwei-schema:
+    build:
+      context: ./schema/
+      dockerfile: Dockerfile
+
+    container_name: "zhiwei-schema"
+    image: "zhiwei-schema:0.1"
+    networks:
+      default:
+    volumes:
+       - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+       - "/data/zw-docker/files/lucene:/tmp/lucene"
+       - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+       - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    #expose:
+    #  - "8890"
+    ports:
+      - "8890:8890"
+    restart: always
+    #depends_on:
+    #   - zhiwei-zookeeper
+    #  - zhiwei-redis
+    #  - zhiwei-rbac
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web03]
+    restart: unless-stopped
+    
+  #8893,devops
+  zhiwei-devops:
+    build:
+      context: ./devops/
+      dockerfile: Dockerfile
+
+    container_name: "zhiwei-devops"
+    image: "zhiwei-devops:0.1"
+    networks:
+      default:
+    volumes:
+      - "/data/zw-docker/files/devops/shell:/data/zhiwei/devops/shell"
+      - "/data/local/git/kanban/:/data/zhiwei/devops/git"
+      - "/data/zw-docker/files/lucene:/tmp/lucene"
+      - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+      - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    expose:
+      - "8893"
+    ports:
+      - "8893:8893"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web03]
+    restart: always 
+     
+  #8887,multi
+  zhiwei-multi:
+    build:
+      context: ./multi/
+      dockerfile: Dockerfile
+
+    container_name: "zhiwei-multi"
+    image: "zhiwei-multi:0.1"
+    networks:
+      default:
+    volumes:
+       - "/data/zw-docker/files/hollow:/nfsc/kb/hollow"
+       - "/data/zw-docker/files/lucene:/tmp/lucene"
+       - "/data/zw-docker/files/schema/schema:/nfsc/kb/tmp/schema"
+       - "/data/zw-docker/files/tmp:/nfsc/kb/tmp/"
+    #expose:
+    #  - "8887"
+    ports:
+      - "8887:8887"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == t3-oddp-oddps-web03]
+    restart: always
+            
+networks:
+   default:
+     external:
+       name: zhiwei

@@ -1,0 +1,9 @@
+server:
+  port: 8893
+
+plugin:
+  contextPath: /api/devops/plugins
+  runMode: prod
+  pluginPath: plugins/devops-plugins
+  pluginConfigFilePath: plugins/devops-plugins-config
+

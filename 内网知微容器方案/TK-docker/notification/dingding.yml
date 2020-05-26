@@ -1,0 +1,8 @@
+#appKey: dingjoha6de7iauz4qbe
+appKey: dingjepdk7hodldwgueg
+#appSecret: YKw6oVWiMOJDtAJI-rh3uSZnYCkqap3DWXDPK9y78qu0LX8A477bejE58E2EuEk3
+appSecret: FpBUSpxDptndAbdRkO2imTu49jEv0teVB8SwR3qP0F3-9JajPioRh5BRm_Q1ZrVo
+agentId: 483021896
+apiToken: https://oapi.dingtalk.com/gettoken
+apiGetUserByMobile: https://oapi.dingtalk.com/user/get_by_mobile
+apiSendMessage: https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2

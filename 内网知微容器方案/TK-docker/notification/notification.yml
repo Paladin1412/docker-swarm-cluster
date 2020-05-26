@@ -1,0 +1,17 @@
+server:
+  port: 8892
+plugin:
+  runMode: prod
+  pluginPath: plugins/notification-plugins
+  pluginConfigFilePath: plugins/notification-plugins-config
+
+spring:
+  kafka:
+    bootstrap-servers: zhiwei-kafka:9092
+  redis:
+    database: 6
+  application:
+    name: service-notification
+logging:
+  level:
+    cn.agilean.notification.core.EventDispatcher: DEBUG
